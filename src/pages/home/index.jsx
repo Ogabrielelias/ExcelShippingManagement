@@ -4,7 +4,7 @@ import "./styles.css";
 
 const defaultInputs = {
     Data_Saida: "",
-    Data_Chegada: "",
+    Data_Retorno: "",
     Veiculo: "",
     Motorista: "",
     Destino: "",
@@ -43,10 +43,10 @@ const Home = () => {
 
     const handleExport = () => {
         const headings = [
-            ["Data_Saida", "Data_Chegada", "Veiculo", "Motorista", "Destino", "Valor"],
+            ["Data_Saida", "Data_Retorno", "Veiculo", "Motorista", "Destino", "Valor"],
         ];
         const newTravels = travels.map((travel) => {
-            travel["Data_Chegada"] = travel.Data_Chegada || "----";
+            travel["Data_Retorno"] = travel.Data_Retorno || "----";
             return travel;
         });
         const date = new Date();
@@ -107,13 +107,13 @@ const Home = () => {
                     />
                 </div>
                 <div>
-                    <label htmlFor="Data_Chegada">Data Chegada :</label>
+                    <label htmlFor="Data_Retorno">Data Retorno :</label>
                     <input
                         min={inputs.Data_Saida}
                         type="datetime-local"
-                        name="Data_Chegada"
-                        id="Data_Chegada"
-                        value={inputs.Data_Chegada}
+                        name="Data_Retorno"
+                        id="Data_Retorno"
+                        value={inputs.Data_Retorno}
                         onChange={handleChange}
                     />
                 </div>
@@ -212,7 +212,7 @@ const Home = () => {
                                 <tr>
                                     <th>Id</th>
                                     <th>Data Saida</th>
-                                    <th>Data Chegada</th>
+                                    <th>Data Retorno</th>
                                     <th>Veículo</th>
                                     <th>Motorista</th>
                                     <th>Destino</th>
@@ -232,9 +232,9 @@ const Home = () => {
                                                 )}
                                             </td>
                                             <td>
-                                                {new Date(travel.Data_Chegada).getMonth()
+                                                {new Date(travel.Data_Retorno).getMonth()
                                                     ? new Date(
-                                                          travel.Data_Chegada
+                                                          travel.Data_Retorno
                                                       ).toLocaleDateString("pt-BR", {
                                                           timeZone: "UTC",
                                                       })
