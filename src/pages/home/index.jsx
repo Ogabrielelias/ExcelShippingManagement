@@ -151,7 +151,7 @@ const Home = () => {
                     />
                 </div>
                 <div>
-                    <label htmlFor="Valor">Valor*:</label>
+                    <label htmlFor="Valor">Valor* :</label>
                     <input
                         type="number"
                         step={0.1}
@@ -200,7 +200,7 @@ const Home = () => {
                                     onClick={handleExport}
                                     className="btn btn-primary float-right"
                                 >
-                                    Exportar Arquivo
+                                    Salvar Arquivo
                                 </button>
                             </div>
                         </div>
