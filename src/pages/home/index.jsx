@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { read, utils, writeFile } from "xlsx";
 import "./styles.css";
 
+const vehicles = ["HR", "Courie", "Saveiro", "710"];
+
 const defaultInputs = {
     Data_Entrega: "",
-    Veiculo: "",
+    Veiculo: vehicles[0],
     Motorista: "",
     Destino: "",
     Valor: "",
@@ -63,6 +65,7 @@ const Home = () => {
             }
             return travel;
         });
+
         const date = new Date();
 
         const wb = utils.book_new();
@@ -105,7 +108,9 @@ const Home = () => {
                 return [...prev, inputs];
             });
         }
-        setInputs(defaultInputs);
+        setInputs((prev) => {
+            return { ...defaultInputs, Data_Entrega: prev.Data_Entrega };
+        });
         setOnEdit(false);
     };
 
@@ -131,7 +136,7 @@ const Home = () => {
             <h1>Lançamento de Viagens</h1>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label htmlFor="Data_Entrega">Data Saida* :</label>
+                    <label htmlFor="Data_Entrega">Data Entrega* :</label>
                     <input
                         type="date"
                         name="Data_Entrega"
@@ -143,18 +148,32 @@ const Home = () => {
                 </div>
                 <div>
                     <label htmlFor="Veiculo">Veiculo* :</label>
-                    <input
+                    <select
+                        onChange={handleChange}
+                        value={inputs.Veiculo}
+                        name="Veiculo"
+                        id="Veiculo"
+                    >
+                        {vehicles.map((v) => (
+                            <option key={v} value={v}>
+                                {v}
+                            </option>
+                        ))}
+                    </select>
+                    {/* <input
+                        minLength={1}
                         type="text"
                         name="Veiculo"
                         id="Veiculo"
                         value={inputs.Veiculo}
                         onChange={handleChange}
                         required
-                    />
+                    /> */}
                 </div>
                 <div>
                     <label htmlFor="Motorista">Motorista* :</label>
                     <input
+                        minLength={2}
                         type="text"
                         name="Motorista"
                         id="Motorista"
@@ -166,6 +185,7 @@ const Home = () => {
                 <div>
                     <label htmlFor="Destino">Destino* :</label>
                     <input
+                        minLength={1}
                         type="text"
                         name="Destino"
                         id="Destino"
@@ -179,6 +199,7 @@ const Home = () => {
                     <input
                         type="number"
                         step={0.1}
+                        min={0}
                         name="Valor"
                         id="Valor"
                         value={inputs.Valor}
@@ -194,7 +215,9 @@ const Home = () => {
                         <button
                             className="cancel"
                             onClick={() => {
-                                setInputs(defaultInputs);
+                                setInputs((prev) => {
+                                    return { ...defaultInputs, Data_Entrega: prev.Data_Entrega };
+                                });
                                 setOnEdit(false);
                             }}
                         >

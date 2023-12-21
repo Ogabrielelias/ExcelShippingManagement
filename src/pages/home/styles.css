@@ -59,7 +59,7 @@ form > div {
     grid-column-end: 3;
 }
 
-form > div > input {
+form > div > input, form > div > select {
     padding: 8px 16px;
     border-radius: 5px;
     border: none;
