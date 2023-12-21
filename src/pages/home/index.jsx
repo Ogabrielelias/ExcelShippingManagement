@@ -3,8 +3,7 @@ import { read, utils, writeFile } from "xlsx";
 import "./styles.css";
 
 const defaultInputs = {
-    Data_Saida: "",
-    Data_Retorno: "",
+    Data_Entrega: "",
     Veiculo: "",
     Motorista: "",
     Destino: "",
@@ -23,6 +22,14 @@ const Home = () => {
         currency: "BRL",
     });
 
+    function FormataStringData(data) {
+        var dia  = data.split("/")[0];
+        var mes  = data.split("/")[1];
+        var ano  = data.split("/")[2];
+      
+        return ano + '-' + ("0"+mes).slice(-2) + '-' + ("0"+dia).slice(-2);
+      }
+
     const handleImport = ($event) => {
         const files = $event.target.files;
         if (files.length) {
@@ -34,7 +41,11 @@ const Home = () => {
 
                 if (sheets.length) {
                     const rows = utils.sheet_to_json(wb.Sheets[sheets[0]], { raw: false });
-                    setTravels(rows);
+                    let newRows = rows.map((row)=>{
+                        row["Data_Entrega"] = FormataStringData(row.Data_Entrega)
+                        return row;
+                    })
+                    setTravels(newRows);
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -43,10 +54,10 @@ const Home = () => {
 
     const handleExport = () => {
         const headings = [
-            ["Data_Saida", "Data_Retorno", "Veiculo", "Motorista", "Destino", "Valor"],
+            ["Data_Entrega", "Veiculo", "Motorista", "Destino", "Valor"],
         ];
         const newTravels = travels.map((travel) => {
-            travel["Data_Retorno"] = travel.Data_Retorno || "----";
+            travel["Data_Entrega"] = new Date(travel.Data_Entrega).toLocaleDateString('pt-BR', {timeZone:"UTC"});
             return travel;
         });
         const date = new Date();
@@ -68,7 +79,9 @@ const Home = () => {
                 return prev;
             });
         }else{
-            setTravels((prev) => [...prev, inputs]);
+            setTravels((prev) => {
+                return[...prev, inputs];
+            });
         }
         setInputs(defaultInputs);
         setOnEdit(false);
@@ -96,25 +109,14 @@ const Home = () => {
             <h1>Lançamento de Viagens</h1>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label htmlFor="Data_Saida">Data Saida* :</label>
+                    <label htmlFor="Data_Entrega">Data Saida* :</label>
                     <input
-                        type="datetime-local"
-                        name="Data_Saida"
-                        id="Data_Saida"
-                        value={inputs.Data_Saida}
+                        type="date"
+                        name="Data_Entrega"
+                        id="Data_Entrega"
+                        value={inputs.Data_Entrega}
                         onChange={handleChange}
                         required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="Data_Retorno">Data Retorno :</label>
-                    <input
-                        min={inputs.Data_Saida}
-                        type="datetime-local"
-                        name="Data_Retorno"
-                        id="Data_Retorno"
-                        value={inputs.Data_Retorno}
-                        onChange={handleChange}
                     />
                 </div>
                 <div>
@@ -211,8 +213,7 @@ const Home = () => {
                             <thead>
                                 <tr>
                                     <th>Id</th>
-                                    <th>Data Saida</th>
-                                    <th>Data Retorno</th>
+                                    <th>Data Entrega</th>
                                     <th>Veículo</th>
                                     <th>Motorista</th>
                                     <th>Destino</th>
@@ -226,19 +227,10 @@ const Home = () => {
                                         <tr key={index}>
                                             <th>{index}</th>
                                             <td>
-                                                {new Date(travel.Data_Saida).toLocaleDateString(
+                                                {new Date(travel.Data_Entrega).toLocaleDateString(
                                                     "pt-BR",
                                                     { timeZone: "UTC" }
                                                 )}
-                                            </td>
-                                            <td>
-                                                {new Date(travel.Data_Retorno).getMonth()
-                                                    ? new Date(
-                                                          travel.Data_Retorno
-                                                      ).toLocaleDateString("pt-BR", {
-                                                          timeZone: "UTC",
-                                                      })
-                                                    : "--/--/----"}
                                             </td>
                                             <td>{travel.Veiculo}</td>
                                             <td>{travel.Motorista}</td>
