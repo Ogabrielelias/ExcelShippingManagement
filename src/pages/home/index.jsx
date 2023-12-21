@@ -54,7 +54,7 @@ const Home = () => {
 
     const handleExport = () => {
         const headings = [
-            ["Veiculo", "Motorista", "Destino", "Valor", "Data_Entrega"],
+            ["Data_Entrega", "Veiculo", "Motorista", "Destino", "Valor"],
         ];
         const newTravels = travels.map((travel) => {
             travel["Data_Entrega"] = new Date(travel.Data_Entrega).toLocaleDateString('pt-BR', {timeZone:"UTC"});
@@ -80,6 +80,8 @@ const Home = () => {
             });
         }else{
             setTravels((prev) => {
+                console.log(prev)
+                console.log([...prev, inputs])
                 return[...prev, inputs];
             });
         }
