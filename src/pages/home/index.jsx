@@ -24,11 +24,8 @@ const Home = () => {
     });
 
     function FormataStringData(data) {
-        var dia = data.split("/")[0];
-        var mes = data.split("/")[1];
-        var ano = data.split("/")[2];
-
-        return ano + "-" + ("0" + mes).slice(-2) + "-" + ("0" + dia).slice(-2);
+        let dtSplit = data.split("/");
+        return dtSplit[2] + "-" + ("0" + dtSplit[1]).slice(-2) + "-" + ("0" + dtSplit[0]).slice(-2);
     }
 
     const handleImport = ($event) => {
@@ -46,6 +43,7 @@ const Home = () => {
                         row["Data_Entrega"] = FormataStringData(row.Data_Entrega);
                         return row;
                     });
+                    
                     setTravels(newRows);
                 }
             };
@@ -86,18 +84,7 @@ const Home = () => {
             setTravels((prev) => {
                 prev[editIndex] = inputs;
 
-                prev.map((travel) => {
-                    let dtEntrega = travel.Data_Entrega;
-                    if (travel.Data_Entrega.includes("/")) {
-                        travel["Data_Entrega"] = FormataStringData(dtEntrega);
-                    }
-                    return travel;
-                });
-                return prev;
-            });
-        } else {
-            setTravels((prev) => {
-                prev.map((travel) => {
+                let newTravels = prev.map((travel) => {
                     let dtEntrega = travel.Data_Entrega;
                     if (travel.Data_Entrega.includes("/")) {
                         travel["Data_Entrega"] = FormataStringData(dtEntrega);
@@ -105,12 +92,22 @@ const Home = () => {
                     return travel;
                 });
 
-                return [...prev, inputs];
+                return newTravels;
+            });
+        } else {
+            setTravels((prev) => {
+                let newTravels = prev.map((travel) => {
+                    let dtEntrega = travel.Data_Entrega;
+                    if (travel.Data_Entrega.includes("/")) {
+                        travel["Data_Entrega"] = FormataStringData(dtEntrega);
+                    }
+                    return travel;
+                });
+
+                return [...newTravels, inputs];
             });
         }
-        setInputs((prev) => {
-            return { ...defaultInputs, Data_Entrega: prev.Data_Entrega };
-        });
+        resetInputs();
         setOnEdit(false);
     };
 
@@ -130,6 +127,11 @@ const Home = () => {
         setEditIndex(id);
         setInputs(travels[id]);
     };
+
+    const resetInputs = () =>
+        setInputs((prev) => {
+            return { ...defaultInputs, Data_Entrega: prev.Data_Entrega };
+        });
 
     return (
         <div className="home-container">
@@ -215,9 +217,7 @@ const Home = () => {
                         <button
                             className="cancel"
                             onClick={() => {
-                                setInputs((prev) => {
-                                    return { ...defaultInputs, Data_Entrega: prev.Data_Entrega };
-                                });
+                                resetInputs();
                                 setOnEdit(false);
                             }}
                         >
