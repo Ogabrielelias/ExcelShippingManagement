@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { read, utils, writeFile } from "xlsx";
 import "./styles.css";
 
@@ -15,7 +15,6 @@ const Home = () => {
     const [inputs, setInputs] = useState(defaultInputs);
     const [onEdit, setOnEdit] = useState(false);
     const [editIndex, setEditIndex] = useState();
-    
 
     let CurrencyFormat = new Intl.NumberFormat("pt-BR", {
         style: "currency",
@@ -23,12 +22,12 @@ const Home = () => {
     });
 
     function FormataStringData(data) {
-        var dia  = data.split("/")[0];
-        var mes  = data.split("/")[1];
-        var ano  = data.split("/")[2];
-      
-        return ano + '-' + ("0"+mes).slice(-2) + '-' + ("0"+dia).slice(-2);
-      }
+        var dia = data.split("/")[0];
+        var mes = data.split("/")[1];
+        var ano = data.split("/")[2];
+
+        return ano + "-" + ("0" + mes).slice(-2) + "-" + ("0" + dia).slice(-2);
+    }
 
     const handleImport = ($event) => {
         const files = $event.target.files;
@@ -41,10 +40,10 @@ const Home = () => {
 
                 if (sheets.length) {
                     const rows = utils.sheet_to_json(wb.Sheets[sheets[0]], { raw: false });
-                    let newRows = rows.map((row)=>{
-                        row["Data_Entrega"] = FormataStringData(row.Data_Entrega)
+                    let newRows = rows.map((row) => {
+                        row["Data_Entrega"] = FormataStringData(row.Data_Entrega);
                         return row;
-                    })
+                    });
                     setTravels(newRows);
                 }
             };
@@ -53,11 +52,15 @@ const Home = () => {
     };
 
     const handleExport = () => {
-        const headings = [
-            ["Data_Entrega", "Veiculo", "Motorista", "Destino", "Valor"],
-        ];
+        const headings = [["Data_Entrega", "Veiculo", "Motorista", "Destino", "Valor"]];
+
         const newTravels = travels.map((travel) => {
-            travel["Data_Entrega"] = new Date(travel.Data_Entrega).toLocaleDateString('pt-BR', {timeZone:"UTC"});
+            let dtEntrega = travel.Data_Entrega;
+            if (travel.Data_Entrega.includes("-")) {
+                travel["Data_Entrega"] = new Date(dtEntrega).toLocaleDateString("pt-BR", {
+                    timeZone: "UTC",
+                });
+            }
             return travel;
         });
         const date = new Date();
@@ -67,22 +70,39 @@ const Home = () => {
         utils.sheet_add_aoa(ws, headings);
         utils.sheet_add_json(ws, newTravels, { origin: "A2", skipHeader: true });
         utils.book_append_sheet(wb, ws, "Report");
-        writeFile(wb, `Lançamento de Viagens ${date.getDate()}-${date.getMonth()}-${date.getFullYear()}.xlsx`);
+        writeFile(
+            wb,
+            `Lançamento de Viagens ${date.getDate()}-${date.getMonth()}-${date.getFullYear()}.xlsx`
+        );
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if(onEdit){
+        if (onEdit) {
             setTravels((prev) => {
                 prev[editIndex] = inputs;
+
+                prev.map((travel) => {
+                    let dtEntrega = travel.Data_Entrega;
+                    if (travel.Data_Entrega.includes("/")) {
+                        travel["Data_Entrega"] = FormataStringData(dtEntrega);
+                    }
+                    return travel;
+                });
                 return prev;
             });
-        }else{
+        } else {
             setTravels((prev) => {
-                console.log(prev)
-                console.log([...prev, inputs])
-                return[...prev, inputs];
+                prev.map((travel) => {
+                    let dtEntrega = travel.Data_Entrega;
+                    if (travel.Data_Entrega.includes("/")) {
+                        travel["Data_Entrega"] = FormataStringData(dtEntrega);
+                    }
+                    return travel;
+                });
+
+                return [...prev, inputs];
             });
         }
         setInputs(defaultInputs);
@@ -100,12 +120,12 @@ const Home = () => {
         setTravels(newData);
     };
 
-    const handleEdit = (id)=>{
-        setOnEdit(true)
-        setEditIndex(id)
-        setInputs(travels[id])
-    }
-    
+    const handleEdit = (id) => {
+        setOnEdit(true);
+        setEditIndex(id);
+        setInputs(travels[id]);
+    };
+
     return (
         <div className="home-container">
             <h1>Lançamento de Viagens</h1>
@@ -166,13 +186,26 @@ const Home = () => {
                         required
                     />
                 </div>
-                {onEdit ? 
-                <>
-                    <button className="edit" type="submit">Editar</button>
-                    <button className="cancel" onClick={()=>{setInputs(defaultInputs); setOnEdit(false)}}>Cancelar</button>
-                </>
-                :
-                <button type="submit">Registrar</button>}
+                {onEdit ? (
+                    <>
+                        <button className="edit main-btn" type="submit">
+                            Editar
+                        </button>
+                        <button
+                            className="cancel"
+                            onClick={() => {
+                                setInputs(defaultInputs);
+                                setOnEdit(false);
+                            }}
+                        >
+                            Cancelar
+                        </button>
+                    </>
+                ) : (
+                    <button className="main-btn" type="submit">
+                        Registrar
+                    </button>
+                )}
             </form>
             <div className="excel-table">
                 <div>
@@ -201,6 +234,7 @@ const Home = () => {
                             </div>
                             <div>
                                 <button
+                                    type="button"
                                     onClick={handleExport}
                                     className="btn btn-primary float-right"
                                 >
@@ -211,56 +245,56 @@ const Home = () => {
                     </div>
                 </div>
                 <div className="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Id</th>
-                                    <th>Data Entrega</th>
-                                    <th>Veículo</th>
-                                    <th>Motorista</th>
-                                    <th>Destino</th>
-                                    <th>Valor</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {travels.length ? (
-                                    travels.map((travel, index) => (
-                                        <tr key={index}>
-                                            <th>{index}</th>
-                                            <td>
-                                                {new Date(travel.Data_Entrega).toLocaleDateString(
-                                                    "pt-BR",
-                                                    { timeZone: "UTC" }
-                                                )}
-                                            </td>
-                                            <td>{travel.Veiculo}</td>
-                                            <td>{travel.Motorista}</td>
-                                            <td>{travel.Destino}</td>
-                                            <td>
-                                                <span>{CurrencyFormat.format(travel.Valor)}</span>
-                                            </td>
-                                            <td className="actions">
-                                                <a className="edit" onClick={() => handleEdit(index)}>
-                                                    Editar
-                                                </a>
-                                                <a
-                                                    className="delete"
-                                                    onClick={() => handleDelete(index)}
-                                                >
-                                                    Excluir
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colspan="8">Nenhuma Viagem Encontrada.</td>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Data Entrega</th>
+                                <th>Veículo</th>
+                                <th>Motorista</th>
+                                <th>Destino</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {travels.length ? (
+                                travels.map((travel, index) => (
+                                    <tr key={index}>
+                                        <th>{index}</th>
+                                        <td>
+                                            {new Date(travel.Data_Entrega).toLocaleDateString(
+                                                "pt-BR",
+                                                { timeZone: "UTC" }
+                                            )}
+                                        </td>
+                                        <td>{travel.Veiculo}</td>
+                                        <td>{travel.Motorista}</td>
+                                        <td>{travel.Destino}</td>
+                                        <td>
+                                            <span>{CurrencyFormat.format(travel.Valor)}</span>
+                                        </td>
+                                        <td className="actions">
+                                            <a className="edit" onClick={() => handleEdit(index)}>
+                                                Editar
+                                            </a>
+                                            <a
+                                                className="delete"
+                                                onClick={() => handleDelete(index)}
+                                            >
+                                                Excluir
+                                            </a>
+                                        </td>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="8">Nenhuma Viagem Encontrada.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );
