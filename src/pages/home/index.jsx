@@ -54,7 +54,7 @@ const Home = () => {
 
     const handleExport = () => {
         const headings = [
-            ["Data_Entrega", "Veiculo", "Motorista", "Destino", "Valor"],
+            ["Veiculo", "Motorista", "Destino", "Valor", "Data_Entrega"],
         ];
         const newTravels = travels.map((travel) => {
             travel["Data_Entrega"] = new Date(travel.Data_Entrega).toLocaleDateString('pt-BR', {timeZone:"UTC"});
@@ -67,7 +67,7 @@ const Home = () => {
         utils.sheet_add_aoa(ws, headings);
         utils.sheet_add_json(ws, newTravels, { origin: "A2", skipHeader: true });
         utils.book_append_sheet(wb, ws, "Report");
-        writeFile(wb, `Lançamento de Viagens ${date.getDate()}-${date.getMonth()}-${date.getFullYear()} .xlsx`);
+        writeFile(wb, `Lançamento de Viagens ${date.getDate()}-${date.getMonth()}-${date.getFullYear()}.xlsx`);
     };
 
     const handleSubmit = (e) => {
