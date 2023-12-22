@@ -119,7 +119,13 @@ const Home = () => {
 
     const handleDelete = (id) => {
         let newData = travels.filter((_, index) => index !== id);
-        setTravels(newData);
+        setTravels(newData.map((travel)=>{
+            let dtEntrega = travel.Data_Entrega;
+            if (travel.Data_Entrega.includes("/")) {
+                travel["Data_Entrega"] = FormataStringData(dtEntrega);
+            }
+            return travel;
+        }));
     };
 
     const handleEdit = (id) => {
